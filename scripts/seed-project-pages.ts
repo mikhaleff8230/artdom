@@ -76,7 +76,7 @@ async function seedProjectPages() {
     await client.createOrReplace(doc)
   }
 
-  console.log(`Seed completed. Upserted ${docs.length} ArtDom project pages with image assets.`)
+  console.log(`Seed completed. Upserted ${docs.length} WOOD TREABO project pages with image assets.`)
 }
 
 seedProjectPages().catch((error) => {

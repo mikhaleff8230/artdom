@@ -134,8 +134,8 @@ const fallbackHero: HeroContent = {
 }
 
 const fallbackFeatures: FeaturesContent = {
-  titleRo: "Почему выбирают ArtDom",
-  titleRu: "Почему выбирают ArtDom",
+  titleRo: "Почему выбирают WOOD TREABO",
+  titleRu: "Почему выбирают WOOD TREABO",
   descriptionRo: "Подготовка, материалы и покраска под ключ.",
   descriptionRu: "Подготовка, материалы и покраска под ключ.",
   items: [

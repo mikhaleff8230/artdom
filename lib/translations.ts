@@ -107,7 +107,7 @@ export const translations = {
       social: "Контакты",
       copyright: "Все права защищены.",
       madeWith: "Сайт",
-      by: "ArtDom",
+      by: "WOOD TREABO",
       location: "Московская область",
     },
   },

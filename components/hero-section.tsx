@@ -4,6 +4,7 @@ import Link from "next/link"
 import { ArrowRight, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { HeroContent } from "@/lib/sanity"
+import { siteConfig } from "@/lib/site-config"
 
 interface HeroSectionProps {
   content?: HeroContent
@@ -66,7 +67,7 @@ export function HeroSection({ content }: HeroSectionProps) {
               variant="outline"
               className="border-white/30 text-white hover:bg-white/10 rounded-full px-8 py-6 text-base font-medium bg-transparent"
             >
-              <a href="tel:+79990000000">
+              <a href={`tel:${siteConfig.phone}`}>
                 <Phone className="w-5 h-5 mr-2" />
                 Позвонить
               </a>

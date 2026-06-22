@@ -19,8 +19,8 @@ async function seedLandingContent() {
   await client.createOrReplace({
     _id: 'features.main',
     _type: 'features',
-    titleRo: 'Почему выбирают ArtDom',
-    titleRu: 'Почему выбирают ArtDom',
+    titleRo: 'Почему выбирают WOOD TREABO',
+    titleRu: 'Почему выбирают WOOD TREABO',
     descriptionRo: 'Подготовка, материалы и покраска под ключ.',
     descriptionRu: 'Подготовка, материалы и покраска под ключ.',
     items: [
@@ -61,7 +61,7 @@ async function seedLandingContent() {
     image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?q=80&w=1200&auto=format&fit=crop',
   })
 
-  console.log('Seed completed. Upserted ArtDom hero, features and about documents.')
+  console.log('Seed completed. Upserted WOOD TREABO hero, features and about documents.')
 }
 
 seedLandingContent().catch((error) => {

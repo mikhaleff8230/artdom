@@ -6,7 +6,7 @@ import { schemaTypes } from './sanity/schemaTypes'
 
 export default defineConfig({
   name: 'default',
-  title: 'ArtDom CMS',
+  title: 'WOOD TREABO CMS',
   basePath: '/studio',
   projectId,
   dataset,
