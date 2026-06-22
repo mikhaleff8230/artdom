@@ -51,10 +51,18 @@ export async function POST(request: NextRequest) {
 
   const name = normalize(payload.name, 100)
   const phone = normalize(payload.phone, 50)
+  const phoneDigits = phone.replace(/\D/g, "")
 
   if (!name || !phone) {
     return NextResponse.json(
       { success: false, message: "Заполните имя и телефон" },
+      { status: 422 },
+    )
+  }
+
+  if (phoneDigits.length !== 11 || !phoneDigits.startsWith("7")) {
+    return NextResponse.json(
+      { success: false, message: "Введите корректный номер телефона" },
       { status: 422 },
     )
   }

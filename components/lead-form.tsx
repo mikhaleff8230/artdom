@@ -21,9 +21,33 @@ const messengerLabels: Record<Messenger, string> = {
 const successMessage = "Заявка отправлена. Мы свяжемся с вами в течение часа."
 const failureMessage = "Не удалось отправить заявку. Попробуйте ещё раз или позвоните нам."
 
+const getPhoneDigits = (value: string) => {
+  let digits = value.replace(/\D/g, "")
+
+  if (digits.length > 10 && (digits.startsWith("7") || digits.startsWith("8"))) {
+    digits = digits.slice(1)
+  }
+
+  return digits.slice(0, 10)
+}
+
+const formatPhone = (digits: string) => {
+  if (!digits) return ""
+
+  const parts = [digits.slice(0, 3), digits.slice(3, 6), digits.slice(6, 8), digits.slice(8, 10)]
+  let formatted = `(${parts[0]}`
+
+  if (parts[0].length === 3) formatted += ")"
+  if (parts[1]) formatted += ` ${parts[1]}`
+  if (parts[2]) formatted += `-${parts[2]}`
+  if (parts[3]) formatted += `-${parts[3]}`
+
+  return formatted
+}
+
 export function LeadForm({ buttonLabel, buttonClassName, source = "Форма расчета" }: LeadFormProps) {
   const [name, setName] = useState("")
-  const [phone, setPhone] = useState("")
+  const [phoneDigits, setPhoneDigits] = useState("")
   const [area, setArea] = useState("")
   const [location, setLocation] = useState("")
   const [comment, setComment] = useState("")
@@ -35,8 +59,18 @@ export function LeadForm({ buttonLabel, buttonClassName, source = "Форма р
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if (!name.trim() || !phone.trim()) {
+    if (!name.trim() && !phoneDigits) {
       setStatus({ type: "error", message: "Заполните имя и телефон" })
+      return
+    }
+
+    if (!name.trim()) {
+      setStatus({ type: "error", message: "Заполните имя" })
+      return
+    }
+
+    if (phoneDigits.length !== 10) {
+      setStatus({ type: "error", message: "Введите номер телефона полностью" })
       return
     }
 
@@ -49,7 +83,7 @@ export function LeadForm({ buttonLabel, buttonClassName, source = "Форма р
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
-          phone: phone.trim(),
+          phone: `+7${phoneDigits}`,
           service: source,
           area: area.trim(),
           location: location.trim(),
@@ -71,7 +105,7 @@ export function LeadForm({ buttonLabel, buttonClassName, source = "Форма р
       }
 
       setName("")
-      setPhone("")
+      setPhoneDigits("")
       setArea("")
       setLocation("")
       setComment("")
@@ -92,7 +126,21 @@ export function LeadForm({ buttonLabel, buttonClassName, source = "Форма р
   return (
     <form onSubmit={submit} noValidate className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <input name="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Имя" autoComplete="name" aria-required="true" className={fieldClass} />
-      <input name="phone" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="Телефон" inputMode="tel" autoComplete="tel" aria-required="true" className={fieldClass} />
+      <div className="flex w-full items-center rounded-2xl border border-white/20 bg-white/10 px-5 transition-colors focus-within:border-[#ef4444]">
+        <span className="mr-2 shrink-0 text-base" aria-hidden="true">🇷🇺</span>
+        <span className="mr-2 shrink-0 text-white">+7</span>
+        <input
+          name="phone"
+          value={formatPhone(phoneDigits)}
+          onChange={(event) => setPhoneDigits(getPhoneDigits(event.target.value))}
+          placeholder="(999) 123-45-67"
+          inputMode="tel"
+          autoComplete="tel"
+          aria-label="Телефон"
+          aria-required="true"
+          className="min-w-0 flex-1 bg-transparent py-4 text-white placeholder:text-white/45 outline-none"
+        />
+      </div>
       <input name="area" value={area} onChange={(event) => setArea(event.target.value)} placeholder="Площадь фасада, м²" inputMode="decimal" className={fieldClass} />
       <input name="location" value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Район или поселок" autoComplete="address-level2" className={fieldClass} />
       <select name="messenger" value={messenger} onChange={(event) => setMessenger(event.target.value as Messenger)} className={`${fieldClass} sm:col-span-2 appearance-none`}>
