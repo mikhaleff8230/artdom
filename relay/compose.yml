@@ -7,6 +7,8 @@ services:
     ports:
       - "127.0.0.1:3100:3100"
     restart: unless-stopped
+    mem_limit: 256m
+    pids_limit: 64
     read_only: true
     tmpfs:
       - /tmp

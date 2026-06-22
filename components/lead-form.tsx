@@ -1,7 +1,7 @@
 "use client"
 
-import { FormEvent, useState } from "react"
-import { Send } from "lucide-react"
+import { FormEvent, useRef, useState } from "react"
+import { ImagePlus, Send, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 type Messenger = "whatsapp" | "telegram" | "max"
@@ -20,6 +20,9 @@ const messengerLabels: Record<Messenger, string> = {
 
 const successMessage = "Заявка отправлена. Мы свяжемся с вами в течение часа."
 const failureMessage = "Не удалось отправить заявку. Попробуйте ещё раз или позвоните нам."
+const maxPhotos = 4
+const maxPhotoSize = 8 * 1024 * 1024
+const allowedPhotoTypes = new Set(["image/jpeg", "image/png", "image/webp"])
 
 const getPhoneDigits = (value: string) => {
   let digits = value.replace(/\D/g, "")
@@ -52,9 +55,11 @@ export function LeadForm({ buttonLabel, buttonClassName, source = "Форма р
   const [location, setLocation] = useState("")
   const [comment, setComment] = useState("")
   const [website, setWebsite] = useState("")
-  const [messenger, setMessenger] = useState<Messenger>("whatsapp")
+  const [messenger, setMessenger] = useState<Messenger | "">("")
+  const [photos, setPhotos] = useState<File[]>([])
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null)
   const [isSending, setIsSending] = useState(false)
+  const photoInputRef = useRef<HTMLInputElement>(null)
 
   const updatePhone = (value: string, caretPosition: number | null) => {
     const nextDigits = getPhoneDigits(value)
@@ -72,6 +77,33 @@ export function LeadForm({ buttonLabel, buttonClassName, source = "Форма р
     }
 
     setPhoneDigits(nextDigits)
+  }
+
+  const updatePhotos = (files: FileList | null) => {
+    const selected = Array.from(files ?? [])
+
+    if (selected.length > maxPhotos) {
+      setStatus({ type: "error", message: `Можно прикрепить не более ${maxPhotos} фотографий` })
+      return
+    }
+
+    if (selected.some((file) => !allowedPhotoTypes.has(file.type))) {
+      setStatus({ type: "error", message: "Поддерживаются фотографии JPEG, PNG и WebP" })
+      return
+    }
+
+    if (selected.some((file) => file.size > maxPhotoSize)) {
+      setStatus({ type: "error", message: "Размер каждой фотографии не должен превышать 8 МБ" })
+      return
+    }
+
+    setPhotos(selected)
+    setStatus(null)
+  }
+
+  const clearPhotos = () => {
+    setPhotos([])
+    if (photoInputRef.current) photoInputRef.current.value = ""
   }
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -92,24 +124,30 @@ export function LeadForm({ buttonLabel, buttonClassName, source = "Форма р
       return
     }
 
+    if (!messenger) {
+      setStatus({ type: "error", message: "Выберите удобный мессенджер" })
+      return
+    }
+
     setStatus(null)
     setIsSending(true)
 
     try {
+      const formData = new FormData()
+      formData.append("name", name.trim())
+      formData.append("phone", `+7${phoneDigits}`)
+      formData.append("service", source)
+      formData.append("area", area.trim())
+      formData.append("location", location.trim())
+      formData.append("comment", comment.trim())
+      formData.append("messenger", messengerLabels[messenger])
+      formData.append("website", website)
+      formData.append("page_url", window.location.href)
+      photos.forEach((photo) => formData.append("photos", photo, photo.name))
+
       const response = await fetch("/api/lead", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          phone: `+7${phoneDigits}`,
-          service: source,
-          area: area.trim(),
-          location: location.trim(),
-          comment: comment.trim(),
-          messenger: messengerLabels[messenger],
-          website,
-          page_url: window.location.href,
-        }),
+        body: formData,
       })
 
       const result = (await response.json()) as { success?: boolean; message?: string }
@@ -128,7 +166,8 @@ export function LeadForm({ buttonLabel, buttonClassName, source = "Форма р
       setLocation("")
       setComment("")
       setWebsite("")
-      setMessenger("whatsapp")
+      setMessenger("")
+      clearPhotos()
       setStatus({ type: "success", message: successMessage })
     } catch (error) {
       console.error("Failed to send lead:", error)
@@ -159,14 +198,49 @@ export function LeadForm({ buttonLabel, buttonClassName, source = "Форма р
           className="min-w-0 flex-1 bg-transparent py-4 text-white placeholder:text-white/45 outline-none"
         />
       </div>
-      <input name="area" value={area} onChange={(event) => setArea(event.target.value)} placeholder="Площадь фасада, м²" inputMode="decimal" className={fieldClass} />
+      <div className="flex w-full items-center rounded-2xl border border-white/20 bg-white/10 px-5 transition-colors focus-within:border-[#ef4444]">
+        <input
+          name="area"
+          value={area}
+          onChange={(event) => setArea(event.target.value.replace(/[^\d.,]/g, "").slice(0, 10))}
+          placeholder="Площадь фасада"
+          inputMode="decimal"
+          className="min-w-0 flex-1 bg-transparent py-4 text-white placeholder:text-white/45 outline-none"
+        />
+        <span className="ml-2 shrink-0 text-white/70">м²</span>
+      </div>
       <input name="location" value={location} onChange={(event) => setLocation(event.target.value)} placeholder="Район или поселок" autoComplete="address-level2" className={fieldClass} />
       <select name="messenger" value={messenger} onChange={(event) => setMessenger(event.target.value as Messenger)} className={`${fieldClass} sm:col-span-2 appearance-none`}>
+        <option value="" disabled className="text-[#0f1629]">Выберите удобный мессенджер</option>
         <option value="whatsapp" className="text-[#0f1629]">WhatsApp</option>
         <option value="telegram" className="text-[#0f1629]">Telegram</option>
         <option value="max" className="text-[#0f1629]">MAX</option>
       </select>
       <textarea name="comment" value={comment} onChange={(event) => setComment(event.target.value)} placeholder="Что нужно покрасить" className={`${fieldClass} sm:col-span-2 min-h-32 resize-y`} />
+
+      <div className="sm:col-span-2 flex min-h-14 items-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-white transition-colors focus-within:border-[#ef4444]">
+        <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
+          <ImagePlus className="h-5 w-5 shrink-0 text-white/70" />
+          <span className="min-w-0 truncate">
+            {photos.length ? `Прикреплено фото: ${photos.length}` : "Прикрепить фото"}
+          </span>
+          <span className="ml-auto hidden shrink-0 text-xs text-white/45 sm:inline">до 4 файлов, по 8 МБ</span>
+          <input
+            ref={photoInputRef}
+            type="file"
+            name="photos"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            onChange={(event) => updatePhotos(event.target.files)}
+            className="sr-only"
+          />
+        </label>
+        {photos.length > 0 && (
+          <button type="button" onClick={clearPhotos} className="shrink-0 rounded-md p-1 text-white/60 transition-colors hover:text-white" aria-label="Удалить фотографии">
+            <X className="h-5 w-5" />
+          </button>
+        )}
+      </div>
 
       <input
         type="text"

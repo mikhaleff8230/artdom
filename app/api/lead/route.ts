@@ -14,6 +14,10 @@ type LeadPayload = {
   page_url?: unknown
 }
 
+const maxPhotos = 4
+const maxPhotoSize = 8 * 1024 * 1024
+const allowedPhotoTypes = new Set(["image/jpeg", "image/png", "image/webp"])
+
 const normalize = (value: unknown, maxLength = 500) =>
   typeof value === "string"
     ? value.replace(/[\u0000-\u001F\u007F]/g, " ").trim().slice(0, maxLength)
@@ -35,9 +39,30 @@ const display = (value: string) => escapeHtml(value || "Не указано")
 
 export async function POST(request: NextRequest) {
   let payload: LeadPayload
+  let photos: File[] = []
 
   try {
-    payload = (await request.json()) as LeadPayload
+    if (request.headers.get("content-type")?.includes("multipart/form-data")) {
+      const formData = await request.formData()
+      const field = (name: string) => formData.get(name)
+
+      payload = {
+        name: field("name"),
+        phone: field("phone"),
+        service: field("service"),
+        area: field("area"),
+        location: field("location"),
+        comment: field("comment"),
+        messenger: field("messenger"),
+        website: field("website"),
+        page_url: field("page_url"),
+      }
+      photos = formData
+        .getAll("photos")
+        .filter((entry): entry is File => entry instanceof File && entry.size > 0)
+    } else {
+      payload = (await request.json()) as LeadPayload
+    }
   } catch {
     return NextResponse.json({ success: false, message: "Некорректные данные заявки" }, { status: 400 })
   }
@@ -47,6 +72,27 @@ export async function POST(request: NextRequest) {
   // Honeypot: bots receive a normal response, but no Telegram message is sent.
   if (website) {
     return NextResponse.json({ success: true, message: "Заявка отправлена" })
+  }
+
+  if (photos.length > maxPhotos) {
+    return NextResponse.json(
+      { success: false, message: `Можно прикрепить не более ${maxPhotos} фотографий` },
+      { status: 422 },
+    )
+  }
+
+  if (photos.some((photo) => !allowedPhotoTypes.has(photo.type))) {
+    return NextResponse.json(
+      { success: false, message: "Поддерживаются фотографии JPEG, PNG и WebP" },
+      { status: 422 },
+    )
+  }
+
+  if (photos.some((photo) => photo.size > maxPhotoSize)) {
+    return NextResponse.json(
+      { success: false, message: "Размер каждой фотографии не должен превышать 8 МБ" },
+      { status: 422 },
+    )
   }
 
   const name = normalize(payload.name, 100)
@@ -89,9 +135,17 @@ export async function POST(request: NextRequest) {
     `<b>Локация:</b> ${display(location)}`,
     `<b>Комментарий:</b> ${display(comment)}`,
     `<b>Мессенджер:</b> ${display(messenger)}`,
+    `<b>Фотографии:</b> ${photos.length || "Не прикреплены"}`,
     "",
     `<b>Страница:</b> ${display(pageUrl)}`,
     `<b>Время:</b> ${escapeHtml(currentDateTime)}`,
+  ].join("\n")
+
+  const photoCaption = [
+    "Новая заявка с лендинга",
+    `Имя: ${name}`,
+    `Телефон: ${phone}`,
+    `Локация: ${location || "Не указана"}`,
   ].join("\n")
 
   try {
@@ -110,23 +164,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!relayUrl && photos.length) {
+      console.error("Photo uploads require TELEGRAM_RELAY_URL")
+      return NextResponse.json(
+        { success: false, message: "Не удалось отправить фотографии" },
+        { status: 500 },
+      )
+    }
+
+    const relayFormData = new FormData()
+    relayFormData.append("text", message)
+    relayFormData.append("caption", photoCaption)
+    photos.forEach((photo) => relayFormData.append("photos", photo, photo.name))
+
     const telegramResponse = await fetch(endpoint, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        ...(!relayUrl ? { "Content-Type": "application/json" } : {}),
         ...(relayUrl ? { Authorization: `Bearer ${relaySecret}` } : {}),
       },
-      body: JSON.stringify(
-        relayUrl
-          ? { text: message }
-          : {
-              chat_id: chatId,
-              text: message,
-              parse_mode: "HTML",
-              disable_web_page_preview: true,
-            },
-      ),
-      signal: AbortSignal.timeout(10_000),
+      body: relayUrl
+        ? relayFormData
+        : JSON.stringify({
+            chat_id: chatId,
+            text: message,
+            parse_mode: "HTML",
+            disable_web_page_preview: true,
+          }),
+      signal: AbortSignal.timeout(30_000),
     })
 
     if (!telegramResponse.ok) {

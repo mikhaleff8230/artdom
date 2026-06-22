@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { Camera } from "lucide-react"
 import { LeadForm } from "@/components/lead-form"
 
@@ -9,6 +10,13 @@ export function CalculatorSection() {
       <div className="container mx-auto px-4">
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
+            <Image
+              src="/wood-treabo-logo.png"
+              alt="WOOD TREABO"
+              width={250}
+              height={250}
+              className="mb-6 h-auto w-36 sm:w-40"
+            />
             <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 mb-5">
               <span className="w-2 h-2 bg-[#ef4444] rounded-full" />
               <span className="text-white/70 text-sm font-medium uppercase tracking-wide">Расчет стоимости</span>
