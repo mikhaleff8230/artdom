@@ -56,6 +56,24 @@ export function LeadForm({ buttonLabel, buttonClassName, source = "Форма р
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null)
   const [isSending, setIsSending] = useState(false)
 
+  const updatePhone = (value: string, caretPosition: number | null) => {
+    const nextDigits = getPhoneDigits(value)
+    const currentFormatted = formatPhone(phoneDigits)
+
+    // Mobile keyboards may delete a formatting character without firing keydown.
+    if (phoneDigits && nextDigits === phoneDigits && value.length < currentFormatted.length) {
+      const digitsBeforeCaret = value
+        .slice(0, caretPosition ?? value.length)
+        .replace(/\D/g, "").length
+      const removeIndex = Math.max(0, digitsBeforeCaret - 1)
+
+      setPhoneDigits(`${phoneDigits.slice(0, removeIndex)}${phoneDigits.slice(removeIndex + 1)}`)
+      return
+    }
+
+    setPhoneDigits(nextDigits)
+  }
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
@@ -132,7 +150,7 @@ export function LeadForm({ buttonLabel, buttonClassName, source = "Форма р
         <input
           name="phone"
           value={formatPhone(phoneDigits)}
-          onChange={(event) => setPhoneDigits(getPhoneDigits(event.target.value))}
+          onChange={(event) => updatePhone(event.target.value, event.target.selectionStart)}
           placeholder="(999) 123-45-67"
           inputMode="tel"
           autoComplete="tel"
