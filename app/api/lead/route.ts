@@ -59,17 +59,6 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const botToken = process.env.TELEGRAM_BOT_TOKEN
-  const chatId = process.env.TELEGRAM_CHAT_ID
-
-  if (!botToken || !chatId) {
-    console.error("Telegram lead settings are missing")
-    return NextResponse.json(
-      { success: false, message: "Не удалось отправить заявку" },
-      { status: 500 },
-    )
-  }
-
   const service = normalize(payload.service, 150)
   const area = normalize(payload.area, 50)
   const location = normalize(payload.location, 200)
@@ -98,15 +87,37 @@ export async function POST(request: NextRequest) {
   ].join("\n")
 
   try {
-    const telegramResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    const relayUrl = process.env.TELEGRAM_RELAY_URL
+    const relaySecret = process.env.TELEGRAM_RELAY_SECRET
+    const botToken = process.env.TELEGRAM_BOT_TOKEN
+    const chatId = process.env.TELEGRAM_CHAT_ID
+
+    const endpoint = relayUrl || (botToken ? `https://api.telegram.org/bot${botToken}/sendMessage` : "")
+
+    if (!endpoint || (relayUrl ? !relaySecret : !chatId)) {
+      console.error("Telegram lead settings are missing")
+      return NextResponse.json(
+        { success: false, message: "Не удалось отправить заявку" },
+        { status: 500 },
+      )
+    }
+
+    const telegramResponse = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: message,
-        parse_mode: "HTML",
-        disable_web_page_preview: true,
-      }),
+      headers: {
+        "Content-Type": "application/json",
+        ...(relayUrl ? { Authorization: `Bearer ${relaySecret}` } : {}),
+      },
+      body: JSON.stringify(
+        relayUrl
+          ? { text: message }
+          : {
+              chat_id: chatId,
+              text: message,
+              parse_mode: "HTML",
+              disable_web_page_preview: true,
+            },
+      ),
       signal: AbortSignal.timeout(10_000),
     })
 

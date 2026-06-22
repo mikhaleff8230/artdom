@@ -1,0 +1,14 @@
+[Unit]
+Description=SSH tunnel to Telegram relay
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/ssh -NT -i /root/.ssh/telegram_relay_tunnel -o BatchMode=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -L 127.0.0.1:3101:127.0.0.1:3100 root@13.140.165.171
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

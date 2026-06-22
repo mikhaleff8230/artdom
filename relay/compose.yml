@@ -1,0 +1,16 @@
+services:
+  telegram-relay:
+    build: .
+    container_name: telegram-relay
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:3100:3100"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
