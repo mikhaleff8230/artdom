@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { LanguageProvider } from "@/lib/language-context"
+import { YandexMetrika } from "@/components/yandex-metrika"
 import { siteConfig } from "@/lib/site-config"
 import "./globals.css"
 
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ru" className="bg-[#0f1629]">
       <body className={`${inter.variable} font-sans antialiased`}>
+        <YandexMetrika />
         <LanguageProvider>{children}</LanguageProvider>
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
