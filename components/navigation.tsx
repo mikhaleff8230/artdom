@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { LeadForm } from "@/components/lead-form"
 import { messengerLinks } from "@/lib/site-config"
+import type { NavigationContent } from "@/lib/sanity"
 
-const navItems = [
+const navItemsFallback = [
   { href: "/#uslugi", label: "Услуги" },
   { href: "/#raboty", label: "Работы" },
   { href: "/#process", label: "Процесс" },
@@ -30,7 +31,15 @@ const messengerItems = [
   { label: "WhatsApp", href: messengerLinks.whatsapp, icon: <WhatsAppIcon />, color: "bg-[#25d366]" },
 ]
 
-export function Navigation() {
+export function Navigation({ content }: { content?: NavigationContent }) {
+  const brandName = content?.brandName ?? "WOOD TREABO"
+  const navItems = content?.items?.length ? content.items : navItemsFallback
+  const ctaButtonText = content?.ctaButtonText ?? "Оставить заявку"
+  const leadDialogTitle = content?.leadDialogTitle ?? "Сделайте расчет покраски дома уже сейчас"
+  const leadDialogDescription =
+    content?.leadDialogDescription ??
+    "Заполните форму, выберите удобный мессенджер и прикрепите фотографии дома после отправки."
+
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isLeadOpen, setIsLeadOpen] = useState(false)
@@ -59,11 +68,13 @@ export function Navigation() {
           className={`rounded-full flex items-center justify-between shadow-xl transition-all duration-300 ease-out ${
             showSolid
               ? "bg-[#1a2234]/95 backdrop-blur-md px-6 py-2.5"
-              : "bg-white/35 backdrop-blur-xl border border-white/55 px-6 py-3"
+              : "border border-white/45 bg-white/20 px-6 py-3 backdrop-blur-2xl sm:bg-white/35"
           }`}
         >
           <Link href="/" className="flex items-center shrink-0">
-            <span className={`${showLight ? "text-[#202020]" : "text-white"} font-extrabold text-lg sm:text-xl tracking-normal`}>WOOD TREABO</span>
+            <span className={`${showLight ? "text-[#202020]" : "text-white"} font-extrabold text-lg sm:text-xl tracking-normal`}>
+              {brandName}
+            </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-7 lg:gap-9">
@@ -121,9 +132,9 @@ export function Navigation() {
             <Button
               type="button"
               onClick={openLead}
-              className="hidden sm:flex rounded-full bg-[#ef4444] px-6 py-2 text-sm font-bold text-white hover:bg-[#dc2626]"
+              className="hidden cursor-pointer rounded-full bg-[#ef4444] px-6 py-2 text-sm font-bold text-white transition-[background-color,transform,box-shadow] hover:-translate-y-0.5 hover:bg-[#dc2626] hover:shadow-lg sm:flex"
             >
-              Оставить заявку
+              {ctaButtonText}
             </Button>
 
             <button onClick={() => setIsOpen(!isOpen)} className={`md:hidden p-2 ${showLight ? "text-[#202020]" : "text-white"}`} aria-label="Меню">
@@ -143,8 +154,8 @@ export function Navigation() {
                 {item.label}
               </Link>
             ))}
-            <Button type="button" onClick={openLead} className="w-full rounded-full mt-2 bg-[#ef4444] hover:bg-[#dc2626] text-white font-bold">
-              Оставить заявку
+            <Button type="button" onClick={openLead} className="mt-2 w-full cursor-pointer rounded-full bg-[#ef4444] font-bold text-white transition-colors hover:bg-[#dc2626]">
+              {ctaButtonText}
             </Button>
           </div>
         </div>
@@ -153,10 +164,8 @@ export function Navigation() {
       <Dialog open={isLeadOpen} onOpenChange={setIsLeadOpen}>
         <DialogContent className="max-h-[92vh] overflow-y-auto border-white/10 bg-[#0f1629] p-6 text-white sm:max-w-3xl sm:p-8">
           <DialogHeader>
-            <DialogTitle className="pr-8 text-2xl sm:text-3xl">Сделайте расчет покраски дома уже сейчас</DialogTitle>
-            <DialogDescription className="text-base text-white/60">
-              Заполните форму, выберите удобный мессенджер и прикрепите фотографии дома после отправки.
-            </DialogDescription>
+            <DialogTitle className="pr-8 text-2xl sm:text-3xl">{leadDialogTitle}</DialogTitle>
+            <DialogDescription className="text-base text-white/60">{leadDialogDescription}</DialogDescription>
           </DialogHeader>
           <LeadForm
             buttonLabel="Отправить заявку"

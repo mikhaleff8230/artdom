@@ -1,4 +1,4 @@
-import { defineField, defineType } from 'sanity'
+import { defineArrayMember, defineField, defineType } from 'sanity'
 
 export const heroType = defineType({
   name: 'hero',
@@ -9,14 +9,47 @@ export const heroType = defineType({
     defineField({ name: 'titleRu', title: 'Заголовок (копия для сайта)', type: 'string', validation: (rule) => rule.required() }),
     defineField({ name: 'subtitleRo', title: 'Подзаголовок', type: 'text', rows: 3 }),
     defineField({ name: 'subtitleRu', title: 'Подзаголовок (копия для сайта)', type: 'text', rows: 3 }),
-    defineField({ name: 'buttonTextRo', title: 'Текст кнопки', type: 'string' }),
-    defineField({ name: 'buttonTextRu', title: 'Текст кнопки (копия для сайта)', type: 'string' }),
+    defineField({ name: 'locationText', title: 'Текст локации', type: 'string', initialValue: 'Московская область · бесплатный выезд' }),
+    defineField({
+      name: 'benefits',
+      title: 'Преимущества',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          fields: [
+            defineField({ name: 'label', title: 'Текст', type: 'string', validation: (rule) => rule.required() }),
+            defineField({
+              name: 'icon',
+              title: 'Иконка',
+              type: 'string',
+              options: {
+                list: [
+                  { title: 'Щит', value: 'shield' },
+                  { title: 'Договор', value: 'file' },
+                  { title: 'Камера', value: 'camera' },
+                  { title: 'Галочка', value: 'badge' },
+                ],
+              },
+            }),
+          ],
+        }),
+      ],
+    }),
+    defineField({ name: 'buttonTextRo', title: 'Текст кнопки', type: 'string', initialValue: 'Оставить заявку' }),
+    defineField({ name: 'buttonTextRu', title: 'Текст кнопки (копия для сайта)', type: 'string', initialValue: 'Оставить заявку' }),
     defineField({ name: 'buttonLink', title: 'Ссылка кнопки', type: 'string' }),
     defineField({
       name: 'image',
-      title: 'Фоновое изображение',
+      title: 'Фоновое изображение (URL)',
       type: 'url',
-      validation: (rule) => rule.required(),
+      validation: (rule) => rule.required().uri({ allowRelative: true, scheme: ['http', 'https'] }),
+    }),
+    defineField({
+      name: 'logoUrl',
+      title: 'Логотип (URL, опционально)',
+      type: 'url',
+      validation: (rule) => rule.uri({ allowRelative: true, scheme: ['http', 'https'] }),
     }),
   ],
 })

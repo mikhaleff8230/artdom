@@ -10,25 +10,25 @@ import { CTASection } from "@/components/cta-section"
 import { Footer } from "@/components/footer"
 import { ServicesSection } from "@/components/services-section"
 import { TestimonialsGeoSection } from "@/components/testimonials-geo-section"
-import { getAbout, getFeatures, getHero } from "@/lib/sanity"
+import { getHomepageContent } from "@/lib/sanity"
 
 export default async function HomePage() {
-  const [hero, features, about] = await Promise.all([getHero(), getFeatures(), getAbout()])
+  const content = await getHomepageContent()
 
   return (
     <main className="min-h-screen">
-      <Navigation />
-      <HeroSection content={hero} />
-      <FeaturesSection content={features} />
-      <PortfolioSection />
-      <ServicesSection />
-      <StatsSection />
-      <AboutSection content={about} />
-      <CalculatorSection />
-      <TestimonialsGeoSection />
-      <FAQSection />
-      <CTASection />
-      <Footer />
+      <Navigation content={content.navigation} />
+      <HeroSection content={content.hero} />
+      <FeaturesSection content={content.problems} />
+      <PortfolioSection content={content.portfolioSection} projects={content.portfolioProjects} />
+      <ServicesSection content={content.servicesSection} />
+      <StatsSection content={content.statsSection} />
+      <AboutSection content={content.about} />
+      <CalculatorSection content={content.calculatorSection} />
+      <TestimonialsGeoSection content={content.testimonialsSection} />
+      <FAQSection content={content.faqSection} />
+      <CTASection content={content.ctaSection} />
+      <Footer content={content.footer} />
     </main>
   )
 }

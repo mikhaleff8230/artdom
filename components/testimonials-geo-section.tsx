@@ -2,28 +2,22 @@
 
 import Image from "next/image"
 import { MapPin, MessageSquareQuote } from "lucide-react"
+import type { TestimonialsSectionContent } from "@/lib/sanity"
 
-const reviews = [
-  {
-    name: "Ирина, Истра",
-    text: "Дом заметно посветлел уже после шлифовки, а после покраски выглядит как новый. Все этапы присылали фото.",
-    image: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    name: "Сергей, Новая Рига",
-    text: "Понравилось, что Александр сам приехал, объяснил по материалам и дал понятную смету без скрытых доплат.",
-    image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    name: "Ольга, Волоколамск",
-    text: "Красили фасад и террасу. Сроки выдержали, участок после работ оставили чистым.",
-    image: "https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?q=80&w=800&auto=format&fit=crop",
-  },
-]
+interface TestimonialsGeoSectionProps {
+  content?: TestimonialsSectionContent
+}
 
-const locations = ["Шаховская", "Волоколамск", "Новопетровское", "Руза", "Можайск", "Истра", "Новая Рига"]
+export function TestimonialsGeoSection({ content }: TestimonialsGeoSectionProps) {
+  const reviewsBadge = content?.reviewsBadge ?? "Отзывы"
+  const reviewsTitle = content?.reviewsTitle ?? "Что говорят клиенты"
+  const reviews = content?.reviews ?? []
+  const geoBadge = content?.geoBadge ?? "География"
+  const geoTitle = content?.geoTitle ?? "Работаем по западным направлениям Московской области"
+  const geoDescription =
+    content?.geoDescription ?? "Выезжаем на осмотр, оцениваем состояние фасада и подбираем систему окраски под ваш дом."
+  const locations = content?.locations ?? []
 
-export function TestimonialsGeoSection() {
   return (
     <>
       <section className="py-20 bg-[#f8fafc]">
@@ -31,9 +25,9 @@ export function TestimonialsGeoSection() {
           <div className="mb-12">
             <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 mb-4 border border-gray-100">
               <span className="w-2 h-2 bg-[#22c55e] rounded-full" />
-              <span className="text-[#0f1629]/70 text-sm font-medium uppercase tracking-wide">Отзывы</span>
+              <span className="text-[#0f1629]/70 text-sm font-medium uppercase tracking-wide">{reviewsBadge}</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#0f1629]">Что говорят клиенты</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#0f1629]">{reviewsTitle}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -59,10 +53,10 @@ export function TestimonialsGeoSection() {
             <div>
               <div className="inline-flex items-center gap-2 bg-[#f0f4f8] rounded-full px-4 py-2 mb-4">
                 <span className="w-2 h-2 bg-[#22c55e] rounded-full" />
-                <span className="text-[#0f1629]/70 text-sm font-medium uppercase tracking-wide">География</span>
+                <span className="text-[#0f1629]/70 text-sm font-medium uppercase tracking-wide">{geoBadge}</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-[#0f1629] mb-4">Работаем по западным направлениям Московской области</h2>
-              <p className="text-[#0f1629]/60 text-lg">Выезжаем на осмотр, оцениваем состояние фасада и подбираем систему окраски под ваш дом.</p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-[#0f1629] mb-4">{geoTitle}</h2>
+              <p className="text-[#0f1629]/60 text-lg">{geoDescription}</p>
             </div>
 
             <div className="rounded-3xl border border-gray-100 bg-[#f8fafc] p-6">
