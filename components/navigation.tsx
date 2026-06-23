@@ -59,7 +59,7 @@ export function Navigation() {
           className={`rounded-full flex items-center justify-between shadow-xl transition-all duration-300 ease-out ${
             showSolid
               ? "bg-[#1a2234]/95 backdrop-blur-md px-6 py-2.5"
-              : "bg-white/92 backdrop-blur-md border border-black/5 px-6 py-3"
+              : "bg-white/35 backdrop-blur-xl border border-white/55 px-6 py-3"
           }`}
         >
           <Link href="/" className="flex items-center shrink-0">

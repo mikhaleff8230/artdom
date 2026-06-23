@@ -29,17 +29,18 @@ const benefits = [
 export function HeroSection({ content: _content }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden bg-white pt-28 text-[#202020] sm:pt-32 lg:min-h-[880px] lg:pt-36">
-      <div className="absolute inset-y-0 right-0 hidden w-[57%] lg:block">
+      <div className="absolute inset-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[57%]">
         <Image
           src="/hero-house-design.jpg"
           alt="Покраска деревянного дома в Московской области"
           fill
           priority
-          sizes="57vw"
-          className="object-cover object-center"
+          sizes="(min-width: 1024px) 57vw, 100vw"
+          className="object-cover object-[62%_center] lg:object-center"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,#fff_0%,rgba(255,255,255,0.97)_8%,rgba(255,255,255,0.42)_25%,rgba(255,255,255,0)_48%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white/55 to-transparent" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.94)_0%,rgba(255,255,255,0.82)_42%,rgba(255,255,255,0.72)_100%)] lg:hidden" />
+        <div className="absolute inset-0 hidden bg-[linear-gradient(90deg,#fff_0%,rgba(255,255,255,0.97)_8%,rgba(255,255,255,0.42)_25%,rgba(255,255,255,0)_48%)] lg:block" />
+        <div className="absolute inset-x-0 bottom-0 hidden h-28 bg-gradient-to-t from-white/55 to-transparent lg:block" />
       </div>
 
       <div className="relative z-10 mx-auto grid max-w-7xl px-5 pb-14 sm:px-8 lg:grid-cols-[58%_42%] lg:px-10 lg:pb-20">
@@ -106,18 +107,6 @@ export function HeroSection({ content: _content }: HeroSectionProps) {
               </a>
             </Button>
           </div>
-        </div>
-
-        <div className="relative mt-10 aspect-[4/3] overflow-hidden lg:hidden">
-          <Image
-            src="/hero-house-design.jpg"
-            alt="Дом во время фасадных работ"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-center"
-          />
-          <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-white to-transparent" />
         </div>
       </div>
     </section>
