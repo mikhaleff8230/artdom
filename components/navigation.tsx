@@ -38,6 +38,7 @@ export function Navigation() {
   const pathname = usePathname()
   const isHomepage = pathname === "/"
   const showSolid = isHomepage ? isScrolled : !isScrolled
+  const showLight = isHomepage && !isScrolled
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50)
@@ -56,11 +57,13 @@ export function Navigation() {
       <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-6xl">
         <div
           className={`rounded-full flex items-center justify-between shadow-xl transition-all duration-300 ease-out ${
-            showSolid ? "bg-[#1a2234]/95 backdrop-blur-md px-6 py-2.5" : "bg-white/10 backdrop-blur-sm border border-white/20 px-6 py-3"
+            showSolid
+              ? "bg-[#1a2234]/95 backdrop-blur-md px-6 py-2.5"
+              : "bg-white/92 backdrop-blur-md border border-black/5 px-6 py-3"
           }`}
         >
           <Link href="/" className="flex items-center shrink-0">
-            <span className="text-white font-extrabold text-lg sm:text-xl tracking-normal">WOOD TREABO</span>
+            <span className={`${showLight ? "text-[#202020]" : "text-white"} font-extrabold text-lg sm:text-xl tracking-normal`}>WOOD TREABO</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-7 lg:gap-9">
@@ -69,7 +72,7 @@ export function Navigation() {
                 key={item.href}
                 href={item.href}
                 className={`text-base font-medium transition-colors ${
-                  showSolid ? "text-white/75 hover:text-white" : "text-white/90 hover:text-white"
+                  showLight ? "text-[#303030]/80 hover:text-[#202020]" : "text-white/75 hover:text-white"
                 }`}
               >
                 {item.label}
@@ -123,7 +126,7 @@ export function Navigation() {
               Оставить заявку
             </Button>
 
-            <button onClick={() => setIsOpen(!isOpen)} className="md:hidden text-white p-2" aria-label="Меню">
+            <button onClick={() => setIsOpen(!isOpen)} className={`md:hidden p-2 ${showLight ? "text-[#202020]" : "text-white"}`} aria-label="Меню">
               {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>

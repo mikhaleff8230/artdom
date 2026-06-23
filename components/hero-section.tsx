@@ -1,7 +1,16 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, Phone } from "lucide-react"
+import {
+  ArrowRight,
+  BadgeCheck,
+  Camera,
+  FileText,
+  MapPin,
+  Phone,
+  ShieldCheck,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { HeroContent } from "@/lib/sanity"
 import { siteConfig } from "@/lib/site-config"
@@ -10,86 +19,105 @@ interface HeroSectionProps {
   content?: HeroContent
 }
 
-const fallbackImage =
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
+const benefits = [
+  { label: "Более 10 лет опыта", icon: ShieldCheck },
+  { label: "Работа по договору", icon: FileText },
+  { label: "Фотоотчет каждого этапа", icon: Camera },
+  { label: "Гарантия на выполненные работы", icon: BadgeCheck },
+]
 
-export function HeroSection({ content }: HeroSectionProps) {
-  const imageUrl = content?.imageUrl || fallbackImage
-  const benefits = ["Более 10 лет опыта", "Работа по договору", "Фотоотчет каждого этапа", "Гарантия на выполненные работы"]
-
+export function HeroSection({ content: _content }: HeroSectionProps) {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0f1629]">
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url('${imageUrl}')` }}
-      >
-        <div className="absolute inset-0 bg-[#0f1629]/75" />
+    <section className="relative overflow-hidden bg-white pt-28 text-[#202020] sm:pt-32 lg:min-h-[880px] lg:pt-36">
+      <div className="absolute inset-y-0 right-0 hidden w-[57%] lg:block">
+        <Image
+          src="/hero-house-design.jpg"
+          alt="Покраска деревянного дома в Московской области"
+          fill
+          priority
+          sizes="57vw"
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,#fff_0%,rgba(255,255,255,0.97)_8%,rgba(255,255,255,0.42)_25%,rgba(255,255,255,0)_48%)]" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white/55 to-transparent" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 pt-28 pb-24">
-        <div className="max-w-4xl">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2 mb-8">
-            <span className="w-2 h-2 bg-[#22c55e] rounded-full animate-pulse" />
-            <span className="text-white/80 text-sm">Московская область · бесплатный выезд</span>
+      <div className="relative z-10 mx-auto grid max-w-7xl px-5 pb-14 sm:px-8 lg:grid-cols-[58%_42%] lg:px-10 lg:pb-20">
+        <div className="max-w-[740px]">
+          <div className="mb-5 flex h-[92px] w-[96px] items-center justify-center overflow-hidden rounded bg-[#141414] p-1.5 shadow-sm sm:h-[104px] sm:w-[108px]">
+            <Image
+              src="/wood-treabo-logo.png"
+              alt="WOOD TREABO"
+              width={250}
+              height={242}
+              priority
+              className="h-full w-full object-contain"
+            />
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 text-balance">
-            Покраска деревянных и каркасных домов под ключ в Московской области
+          <div className="mb-7 inline-flex items-center gap-2.5 text-sm font-medium text-[#383838] sm:text-base">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f7f3ee] text-[#b85f11]">
+              <MapPin className="h-4 w-4" />
+            </span>
+            Московская область · бесплатный выезд
+          </div>
+
+          <h1 className="max-w-[730px] text-[2.15rem] font-bold leading-[1.12] tracking-normal text-[#202020] sm:text-5xl lg:text-[3.25rem]">
+            Покраска деревянных<span className="hidden lg:inline"><br /></span>{" "}
+            и каркасных домов под ключ<span className="hidden lg:inline"><br /></span>{" "}
+            в Московской области
           </h1>
 
-          <p className="text-white/70 text-base sm:text-xl max-w-2xl mb-8 leading-relaxed">
-            Шлифовка, обработка и покраска фасадов. Работаем без посредников. Бесплатный выезд и расчет стоимости.
+          <p className="mt-7 max-w-xl text-base leading-7 text-[#565656] sm:text-lg sm:leading-8">
+            Шлифовка, обработка и покраска фасадов.<br className="hidden sm:block" /> Работаем без посредников.<br className="hidden sm:block" /> Бесплатный выезд и расчет стоимости.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mb-10">
-            {benefits.map((benefit) => (
-              <div key={benefit} className="flex items-center gap-2 text-white/85">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#22c55e]/20 text-[#86efac] text-sm">✓</span>
-                <span className="text-sm sm:text-base">{benefit}</span>
+          <div className="mt-8 grid max-w-[640px] gap-x-8 gap-y-4 sm:grid-cols-2 sm:gap-y-5">
+            {benefits.map(({ label, icon: Icon }) => (
+              <div key={label} className="flex min-h-10 items-center gap-3 text-sm font-medium text-[#303030] sm:text-base">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f5faf6] text-[#27a65a]">
+                  <Icon className="h-[18px] w-[18px]" />
+                </span>
+                <span>{label}</span>
               </div>
             ))}
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button
               asChild
               size="lg"
-              className="bg-white text-[#0f1629] hover:bg-white/90 rounded-full px-8 py-6 text-base font-medium group"
+              className="h-14 rounded-full bg-[#b85f11] px-7 text-base font-bold text-white shadow-[0_10px_30px_rgba(184,95,17,0.2)] hover:bg-[#9d4e0b]"
             >
               <Link href="#raschet">
                 Отправить фото дома
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button
               asChild
               size="lg"
               variant="outline"
-              className="border-white/30 text-white hover:bg-white/10 rounded-full px-8 py-6 text-base font-medium bg-transparent"
+              className="h-14 rounded-full border-[#d4d4d4] bg-white px-7 text-base font-medium text-[#303030] hover:bg-[#f7f7f7]"
             >
               <a href={`tel:${siteConfig.phone}`}>
-                <Phone className="w-5 h-5 mr-2" />
+                <Phone className="mr-2 h-4 w-4" />
                 Позвонить
               </a>
             </Button>
           </div>
         </div>
 
-        <div className="mt-16 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 max-w-2xl">
-          <div className="grid grid-cols-3 gap-4 sm:gap-8">
-            <div>
-              <div className="text-3xl sm:text-4xl font-bold text-white">120+</div>
-              <div className="text-white/50 text-xs sm:text-sm mt-1 uppercase tracking-wide">объектов</div>
-            </div>
-            <div className="border-x border-white/10 px-4">
-              <div className="text-3xl sm:text-4xl font-bold text-white">10+</div>
-              <div className="text-white/50 text-xs sm:text-sm mt-1 uppercase tracking-wide">лет опыта</div>
-            </div>
-            <div>
-              <div className="text-3xl sm:text-4xl font-bold text-white">2 года</div>
-              <div className="text-white/50 text-xs sm:text-sm mt-1 uppercase tracking-wide">гарантия</div>
-            </div>
-          </div>
+        <div className="relative mt-10 aspect-[4/3] overflow-hidden lg:hidden">
+          <Image
+            src="/hero-house-design.jpg"
+            alt="Дом во время фасадных работ"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-white to-transparent" />
         </div>
       </div>
     </section>
