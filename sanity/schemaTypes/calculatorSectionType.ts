@@ -12,9 +12,9 @@ export const calculatorSectionType = defineType({
     defineField({ name: 'buttonLabel', title: 'Текст кнопки формы', type: 'string', initialValue: 'Отправить фото дома' }),
     defineField({
       name: 'logoUrl',
-      title: 'Логотип (URL)',
-      type: 'url',
-      validation: (rule) => rule.uri({ allowRelative: true, scheme: ['http', 'https'] }),
+      title: 'Логотип',
+      type: 'image',
+      options: { hotspot: true },
     }),
   ],
 })

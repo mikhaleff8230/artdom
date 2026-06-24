@@ -40,8 +40,9 @@ export const problemsType = defineType({
             }),
             defineField({
               name: 'backgroundImage',
-              title: 'Фоновое изображение (URL)',
-              type: 'url',
+              title: 'Фоновое изображение',
+              type: 'image',
+              options: { hotspot: true },
               validation: (rule) => rule.required(),
             }),
           ],

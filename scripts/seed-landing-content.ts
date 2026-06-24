@@ -1,4 +1,5 @@
 import { getSeedClient } from './sanity-seed-client'
+import { uploadImageSource } from './sanity-assets'
 
 const problemImages = [
   'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop',
@@ -29,6 +30,20 @@ const aboutImages = [
 
 async function seedLandingContent() {
   const client = getSeedClient()
+  const [heroImage, logoImage, problemAssets, serviceAssets, aboutAssets, reviewAssets] = await Promise.all([
+    uploadImageSource(client, '/hero-house-design.jpg'),
+    uploadImageSource(client, '/wood-treabo-logo.png'),
+    Promise.all(problemImages.map((source) => uploadImageSource(client, source))),
+    Promise.all(serviceImages.map((source) => uploadImageSource(client, source))),
+    Promise.all(aboutImages.map((source) => uploadImageSource(client, source))),
+    Promise.all(
+      [
+        'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=800&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?q=80&w=800&auto=format&fit=crop',
+      ].map((source) => uploadImageSource(client, source)),
+    ),
+  ])
 
   await client.createOrReplace({
     _id: 'navigation.main',
@@ -62,8 +77,8 @@ async function seedLandingContent() {
     buttonTextRo: 'Оставить заявку',
     buttonTextRu: 'Оставить заявку',
     buttonLink: '#raschet',
-    image: '/hero-house-design.jpg',
-    logoUrl: '/wood-treabo-logo.png',
+    image: heroImage,
+    logoUrl: logoImage,
   })
 
   await client.createOrReplace({
@@ -73,11 +88,11 @@ async function seedLandingContent() {
     title: 'Ваш дом потерял внешний вид?',
     description: 'Своевременная покраска защищает дом на долгие годы и сохраняет его стоимость.',
     items: [
-      { _key: 'p1', title: 'Старая краска выгорает', backgroundImage: problemImages[0] },
-      { _key: 'p2', title: 'Дерево темнеет и сереет', backgroundImage: problemImages[1] },
-      { _key: 'p3', title: 'Появляются трещины', backgroundImage: problemImages[2] },
-      { _key: 'p4', title: 'Фасад теряет привлекательность', backgroundImage: problemImages[3] },
-      { _key: 'p5', title: 'Повышается риск разрушения древесины', backgroundImage: problemImages[4] },
+      { _key: 'p1', title: 'Старая краска выгорает', backgroundImage: problemAssets[0] },
+      { _key: 'p2', title: 'Дерево темнеет и сереет', backgroundImage: problemAssets[1] },
+      { _key: 'p3', title: 'Появляются трещины', backgroundImage: problemAssets[2] },
+      { _key: 'p4', title: 'Фасад теряет привлекательность', backgroundImage: problemAssets[3] },
+      { _key: 'p5', title: 'Повышается риск разрушения древесины', backgroundImage: problemAssets[4] },
     ],
   })
 
@@ -101,15 +116,15 @@ async function seedLandingContent() {
     title: 'Что мы красим',
     description: 'Деревянные фасады, элементы участка и малые постройки под ключ.',
     items: [
-      { _key: 's1', title: 'Каркасные дома', backgroundImage: serviceImages[0] },
-      { _key: 's2', title: 'Дома из бруса', backgroundImage: serviceImages[1] },
-      { _key: 's3', title: 'Имитацию бруса', backgroundImage: serviceImages[2] },
-      { _key: 's4', title: 'Планкен', backgroundImage: serviceImages[3] },
-      { _key: 's5', title: 'Бани', backgroundImage: serviceImages[4] },
-      { _key: 's6', title: 'Террасы', backgroundImage: serviceImages[5] },
-      { _key: 's7', title: 'Беседки', backgroundImage: serviceImages[6] },
-      { _key: 's8', title: 'Заборы', backgroundImage: serviceImages[7] },
-      { _key: 's9', title: 'Хозяйственные постройки', backgroundImage: serviceImages[8] },
+      { _key: 's1', title: 'Каркасные дома', backgroundImage: serviceAssets[0] },
+      { _key: 's2', title: 'Дома из бруса', backgroundImage: serviceAssets[1] },
+      { _key: 's3', title: 'Имитацию бруса', backgroundImage: serviceAssets[2] },
+      { _key: 's4', title: 'Планкен', backgroundImage: serviceAssets[3] },
+      { _key: 's5', title: 'Бани', backgroundImage: serviceAssets[4] },
+      { _key: 's6', title: 'Террасы', backgroundImage: serviceAssets[5] },
+      { _key: 's7', title: 'Беседки', backgroundImage: serviceAssets[6] },
+      { _key: 's8', title: 'Заборы', backgroundImage: serviceAssets[7] },
+      { _key: 's9', title: 'Хозяйственные постройки', backgroundImage: serviceAssets[8] },
     ],
     processBadge: 'Процесс',
     processTitle: 'Простой и понятный процесс',
@@ -157,7 +172,7 @@ async function seedLandingContent() {
       'Лично участвую в каждом объекте и отвечаю за результат.',
       'Для меня важно не просто покрасить дом, а сделать работу так, чтобы она служила долгие годы.',
     ],
-    images: aboutImages,
+    images: aboutAssets,
     legalText: 'работаем по договору, Наши реквизиты: ООО "САНКЭН" ОГРН 1220100001263',
   })
 
@@ -169,7 +184,7 @@ async function seedLandingContent() {
     description: 'Предварительно считаем по фото в течение 15 минут. Точную смету фиксируем после бесплатного осмотра объекта.',
     tipText: 'Укажите удобный мессенджер для связи. После заявки мы уточним детали и попросим 2-4 фотографии фасада с разных сторон.',
     buttonLabel: 'Отправить фото дома',
-    logoUrl: '/wood-treabo-logo.png',
+    logoUrl: logoImage,
   })
 
   await client.createOrReplace({
@@ -182,19 +197,19 @@ async function seedLandingContent() {
         _key: 'r1',
         name: 'Ирина, Истра',
         text: 'Дом заметно посветлел уже после шлифовки, а после покраски выглядит как новый. Все этапы присылали фото.',
-        image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?q=80&w=800&auto=format&fit=crop',
+        image: reviewAssets[0],
       },
       {
         _key: 'r2',
         name: 'Сергей, Новая Рига',
         text: 'Понравилось, что Александр сам приехал, объяснил по материалам и дал понятную смету без скрытых доплат.',
-        image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=800&auto=format&fit=crop',
+        image: reviewAssets[1],
       },
       {
         _key: 'r3',
         name: 'Ольга, Волоколамск',
         text: 'Красили фасад и террасу. Сроки выдержали, участок после работ оставили чистым.',
-        image: 'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?q=80&w=800&auto=format&fit=crop',
+        image: reviewAssets[2],
       },
     ],
     geoBadge: 'География',

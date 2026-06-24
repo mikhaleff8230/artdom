@@ -11,7 +11,8 @@
     "sanity:deploy": "sanity deploy",
     "sanity:seed:projects": "sanity exec scripts/seed-project-pages.ts",
     "sanity:seed:landing": "sanity exec scripts/seed-landing-content.ts",
-    "sanity:seed": "npm run sanity:seed:landing && npm run sanity:seed:projects"
+    "sanity:seed": "npm run sanity:seed:landing && npm run sanity:seed:projects",
+    "sanity:migrate:images": "sanity exec scripts/migrate-images-to-assets.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

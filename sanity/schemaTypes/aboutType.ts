@@ -26,9 +26,9 @@ export const aboutType = defineType({
     }),
     defineField({
       name: 'images',
-      title: 'Фото для слайдера (URL)',
+      title: 'Фото для слайдера',
       type: 'array',
-      of: [defineArrayMember({ type: 'url' })],
+      of: [defineArrayMember({ type: 'image', options: { hotspot: true } })],
       validation: (rule) => rule.required().min(1),
     }),
     defineField({
@@ -42,6 +42,6 @@ export const aboutType = defineType({
     defineField({ name: 'titleRu', title: 'Заголовок legacy RU', type: 'string', hidden: true }),
     defineField({ name: 'descriptionRo', title: 'Описание (legacy)', type: 'text', rows: 4, hidden: true }),
     defineField({ name: 'descriptionRu', title: 'Описание legacy RU', type: 'text', rows: 4, hidden: true }),
-    defineField({ name: 'image', title: 'Фото (legacy)', type: 'url', hidden: true }),
+    defineField({ name: 'image', title: 'Фото (legacy)', type: 'image', options: { hotspot: true }, hidden: true }),
   ],
 })

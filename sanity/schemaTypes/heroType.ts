@@ -41,15 +41,16 @@ export const heroType = defineType({
     defineField({ name: 'buttonLink', title: 'Ссылка кнопки', type: 'string' }),
     defineField({
       name: 'image',
-      title: 'Фоновое изображение (URL)',
-      type: 'url',
-      validation: (rule) => rule.required().uri({ allowRelative: true, scheme: ['http', 'https'] }),
+      title: 'Фоновое изображение',
+      type: 'image',
+      options: { hotspot: true },
+      validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'logoUrl',
-      title: 'Логотип (URL, опционально)',
-      type: 'url',
-      validation: (rule) => rule.uri({ allowRelative: true, scheme: ['http', 'https'] }),
+      title: 'Логотип',
+      type: 'image',
+      options: { hotspot: true },
     }),
   ],
 })

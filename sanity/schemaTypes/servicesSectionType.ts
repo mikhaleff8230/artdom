@@ -25,8 +25,9 @@ export const servicesSectionType = defineType({
             defineField({ name: 'title', title: 'Название', type: 'string', validation: (rule) => rule.required() }),
             defineField({
               name: 'backgroundImage',
-              title: 'Фоновое изображение (URL)',
-              type: 'url',
+              title: 'Фоновое изображение',
+              type: 'image',
+              options: { hotspot: true },
               validation: (rule) => rule.required(),
             }),
           ],

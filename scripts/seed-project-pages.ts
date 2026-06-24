@@ -1,5 +1,6 @@
 import { projects } from '../data/projects'
 import { getSeedClient } from './sanity-seed-client'
+import { uploadImageSource } from './sanity-assets'
 
 type ProjectType = 'apartment' | 'house' | 'commercial'
 type ProjectStatus = 'completed' | 'in-progress'
@@ -7,8 +8,9 @@ type ProjectStatus = 'completed' | 'in-progress'
 async function seedProjectPages() {
   const client = getSeedClient()
 
-  const docs = projects.map((project) => {
-    const gallery = [project.image, ...project.gallery].filter(Boolean)
+  const docs = await Promise.all(projects.map(async (project) => {
+    const gallerySources = [project.image, ...project.gallery].filter(Boolean)
+    const gallery = await Promise.all(gallerySources.map((source) => uploadImageSource(client, source)))
 
     return {
       _id: `projectPage-${project.id}`,
@@ -28,7 +30,7 @@ async function seedProjectPages() {
       status: (project.status === 'completed' ? 'completed' : 'in-progress') as ProjectStatus,
       gallery,
     }
-  })
+  }))
 
   for (const doc of docs) {
     await client.createOrReplace(doc)

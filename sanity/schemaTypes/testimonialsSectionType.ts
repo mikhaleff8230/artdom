@@ -17,7 +17,13 @@ export const testimonialsSectionType = defineType({
           fields: [
             defineField({ name: 'name', title: 'Имя и локация', type: 'string', validation: (rule) => rule.required() }),
             defineField({ name: 'text', title: 'Текст отзыва', type: 'text', rows: 3, validation: (rule) => rule.required() }),
-            defineField({ name: 'image', title: 'Фото (URL)', type: 'url', validation: (rule) => rule.required() }),
+            defineField({
+              name: 'image',
+              title: 'Фото',
+              type: 'image',
+              options: { hotspot: true },
+              validation: (rule) => rule.required(),
+            }),
           ],
         }),
       ],

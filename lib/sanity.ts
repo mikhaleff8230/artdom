@@ -236,8 +236,8 @@ const heroQuery = `*[_id == "hero.main"][0]{
   benefits[]{ label, icon },
   "buttonText": coalesce(buttonTextRu, buttonTextRo, buttonText, "Оставить заявку"),
   "buttonLink": coalesce(buttonLink, "#raschet"),
-  "imageUrl": image,
-  logoUrl
+  "imageUrl": coalesce(image.asset->url, image),
+  "logoUrl": coalesce(logoUrl.asset->url, logoUrl)
 }`
 
 const featuresQuery = `*[_id == "features.main"][0]{
@@ -263,7 +263,7 @@ const aboutQuery = `*[_id == "about.main"][0]{
     [coalesce(descriptionRu, descriptionRo, description)]
   ),
   "images": coalesce(
-    images,
+    select(defined(images[0].asset) => images[].asset->url, images),
     select(defined(image) => [image], [])
   ),
   "legalText": coalesce(legalText, ""),
@@ -271,7 +271,7 @@ const aboutQuery = `*[_id == "about.main"][0]{
   "titleRu": coalesce(titleRu, titleRo, title),
   "descriptionRo": coalesce(descriptionRo, description),
   "descriptionRu": coalesce(descriptionRu, descriptionRo, description),
-  "imageUrl": coalesce(images[0], image)
+  "imageUrl": coalesce(images[0].asset->url, images[0], image.asset->url, image)
 }`
 
 const problemsQuery = `*[_id == "problems.main"][0]{
@@ -280,7 +280,7 @@ const problemsQuery = `*[_id == "problems.main"][0]{
   description,
   items[]{
     title,
-    backgroundImage
+    "backgroundImage": coalesce(backgroundImage.asset->url, backgroundImage)
   }
 }`
 
@@ -288,7 +288,7 @@ const servicesSectionQuery = `*[_id == "servicesSection.main"][0]{
   "badge": coalesce(badge, "Услуги"),
   title,
   description,
-  items[]{ title, backgroundImage },
+  items[]{ title, "backgroundImage": coalesce(backgroundImage.asset->url, backgroundImage) },
   "processBadge": coalesce(processBadge, "Процесс"),
   "processTitle": coalesce(processTitle, "Простой и понятный процесс"),
   "processSteps": coalesce(processSteps, []),
@@ -321,13 +321,13 @@ const calculatorSectionQuery = `*[_id == "calculatorSection.main"][0]{
   description,
   tipText,
   "buttonLabel": coalesce(buttonLabel, "Отправить фото дома"),
-  logoUrl
+  "logoUrl": coalesce(logoUrl.asset->url, logoUrl)
 }`
 
 const testimonialsSectionQuery = `*[_id == "testimonialsSection.main"][0]{
   "reviewsBadge": coalesce(reviewsBadge, "Отзывы"),
   reviewsTitle,
-  reviews[]{ name, text, image },
+  reviews[]{ name, text, "image": coalesce(image.asset->url, image) },
   "geoBadge": coalesce(geoBadge, "География"),
   geoTitle,
   geoDescription,
@@ -378,7 +378,7 @@ const projectPageFields = `{
   "scopeRo": coalesce(scopeRo, scope),
   "scopeRu": coalesce(scopeRu, scopeRo, scope),
   "status": coalesce(status, "completed"),
-  "gallery": coalesce(gallery[].asset->url, gallery)
+  "gallery": select(defined(gallery[0].asset) => gallery[].asset->url, gallery)
 }`
 
 const projectPageByIdQuery = `*[_type == "projectPage" && (_id == "projectPage-" + $id || projectId == $id)][0]${projectPageFields}`

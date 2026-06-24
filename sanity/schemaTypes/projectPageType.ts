@@ -100,9 +100,9 @@ export const projectPageType = defineType({
     }),
     defineField({
       name: 'gallery',
-      title: 'Галерея проекта (URL изображений)',
+      title: 'Галерея проекта',
       type: 'array',
-      of: [{ type: 'url' }],
+      of: [{ type: 'image', options: { hotspot: true } }],
       validation: (rule) => rule.required().min(1),
     }),
   ],
