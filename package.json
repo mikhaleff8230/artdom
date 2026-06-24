@@ -9,8 +9,9 @@
     "lint": "eslint .",
     "sanity:dev": "sanity dev --port 3333",
     "sanity:deploy": "sanity deploy",
-    "sanity:seed:projects": "sanity exec scripts/seed-project-pages.ts --with-user-token",
-    "sanity:seed:landing": "sanity exec scripts/seed-landing-content.ts --with-user-token"
+    "sanity:seed:projects": "sanity exec scripts/seed-project-pages.ts",
+    "sanity:seed:landing": "sanity exec scripts/seed-landing-content.ts",
+    "sanity:seed": "npm run sanity:seed:landing && npm run sanity:seed:projects"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

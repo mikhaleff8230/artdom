@@ -4,6 +4,7 @@ import { projects } from "@/data/projects"
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || "production"
 const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2025-01-01"
+const readToken = process.env.SANITY_API_READ_TOKEN
 const hasValidSanityEnv = Boolean(projectId && projectId !== "yourProjectId" && projectId !== "placeholder" && dataset)
 
 const sanityClient = hasValidSanityEnv
@@ -12,6 +13,8 @@ const sanityClient = hasValidSanityEnv
       dataset,
       apiVersion,
       useCdn: false,
+      token: readToken,
+      perspective: "published",
     })
   : null
 
@@ -226,7 +229,7 @@ export interface CmsProjectPage {
   gallery: string[]
 }
 
-const heroQuery = `*[_type == "hero"][0]{
+const heroQuery = `*[_id == "hero.main"][0]{
   "title": coalesce(titleRu, titleRo, title),
   "subtitle": coalesce(subtitleRu, subtitleRo, subtitle),
   "locationText": coalesce(locationText, "Московская область · бесплатный выезд"),
@@ -237,7 +240,7 @@ const heroQuery = `*[_type == "hero"][0]{
   logoUrl
 }`
 
-const featuresQuery = `*[_type == "features"][0]{
+const featuresQuery = `*[_id == "features.main"][0]{
   "titleRo": coalesce(titleRo, title),
   "titleRu": coalesce(titleRu, titleRo, title),
   "descriptionRo": coalesce(descriptionRo, description),
@@ -252,7 +255,7 @@ const featuresQuery = `*[_type == "features"][0]{
   }
 }`
 
-const aboutQuery = `*[_type == "about"][0]{
+const aboutQuery = `*[_id == "about.main"][0]{
   "label": coalesce(label, "Наша компания в лицах"),
   "heading": coalesce(heading, titleRu, titleRo, title),
   "paragraphs": coalesce(
@@ -271,7 +274,7 @@ const aboutQuery = `*[_type == "about"][0]{
   "imageUrl": coalesce(images[0], image)
 }`
 
-const problemsQuery = `*[_type == "problems"][0]{
+const problemsQuery = `*[_id == "problems.main"][0]{
   "badge": coalesce(badge, "Проблема"),
   title,
   description,
@@ -281,7 +284,7 @@ const problemsQuery = `*[_type == "problems"][0]{
   }
 }`
 
-const servicesSectionQuery = `*[_type == "servicesSection"][0]{
+const servicesSectionQuery = `*[_id == "servicesSection.main"][0]{
   "badge": coalesce(badge, "Услуги"),
   title,
   description,
@@ -295,7 +298,7 @@ const servicesSectionQuery = `*[_type == "servicesSection"][0]{
   prices[]{ title, price }
 }`
 
-const portfolioSectionQuery = `*[_type == "portfolioSection"][0]{
+const portfolioSectionQuery = `*[_id == "portfolioSection.main"][0]{
   "badge": coalesce(badge, "Результаты наших работ"),
   title,
   description,
@@ -306,13 +309,13 @@ const portfolioSectionQuery = `*[_type == "portfolioSection"][0]{
   "viewDetailsText": coalesce(viewDetailsText, "Подробнее")
 }`
 
-const statsSectionQuery = `*[_type == "statsSection"][0]{
+const statsSectionQuery = `*[_id == "statsSection.main"][0]{
   "badge": coalesce(badge, "Почему выбирают нас"),
   title,
   items
 }`
 
-const calculatorSectionQuery = `*[_type == "calculatorSection"][0]{
+const calculatorSectionQuery = `*[_id == "calculatorSection.main"][0]{
   "badge": coalesce(badge, "Расчет стоимости"),
   title,
   description,
@@ -321,7 +324,7 @@ const calculatorSectionQuery = `*[_type == "calculatorSection"][0]{
   logoUrl
 }`
 
-const testimonialsSectionQuery = `*[_type == "testimonialsSection"][0]{
+const testimonialsSectionQuery = `*[_id == "testimonialsSection.main"][0]{
   "reviewsBadge": coalesce(reviewsBadge, "Отзывы"),
   reviewsTitle,
   reviews[]{ name, text, image },
@@ -331,19 +334,19 @@ const testimonialsSectionQuery = `*[_type == "testimonialsSection"][0]{
   locations
 }`
 
-const faqSectionQuery = `*[_type == "faqSection"][0]{
+const faqSectionQuery = `*[_id == "faqSection.main"][0]{
   "badge": coalesce(badge, "Вопросы"),
   title,
   items[]{ question, answer }
 }`
 
-const ctaSectionQuery = `*[_type == "ctaSection"][0]{
+const ctaSectionQuery = `*[_id == "ctaSection.main"][0]{
   title,
   description,
   "buttonText": coalesce(buttonText, "Отправить фото дома")
 }`
 
-const navigationQuery = `*[_type == "navigation"][0]{
+const navigationQuery = `*[_id == "navigation.main"][0]{
   "brandName": coalesce(brandName, "WOOD TREABO"),
   items[]{ label, href },
   "ctaButtonText": coalesce(ctaButtonText, "Оставить заявку"),
@@ -351,7 +354,7 @@ const navigationQuery = `*[_type == "navigation"][0]{
   leadDialogDescription
 }`
 
-const footerQuery = `*[_type == "footer"][0]{
+const footerQuery = `*[_id == "footer.main"][0]{
   "brandName": coalesce(brandName, "WOOD TREABO"),
   description,
   "sectionsTitle": coalesce(sectionsTitle, "Разделы"),
@@ -628,10 +631,35 @@ const fallbackFooter: FooterContent = {
 async function fetchSanity<T>(query: string, fallback: T): Promise<T> {
   if (!sanityClient) return fallback
   try {
-    return (await sanityClient.fetch(query, {}, { cache: "no-store" })) || fallback
+    const data = await sanityClient.fetch<T | null>(query, {}, { cache: "no-store" })
+    return data ?? fallback
   } catch {
     return fallback
   }
+}
+
+function hasItems<T>(value: T[] | null | undefined): value is T[] {
+  return Array.isArray(value) && value.length > 0
+}
+
+function mergeSection<T extends object>(fallback: T, data: T | null | undefined, arrayKeys: (keyof T)[]): T {
+  if (!data) return fallback
+  const merged = { ...fallback, ...data }
+  for (const key of arrayKeys) {
+    if (!hasItems(data[key] as unknown[])) {
+      merged[key] = fallback[key]
+    }
+  }
+  return merged
+}
+
+function isCompleteCmsProject(project: CmsProjectPage | null | undefined): project is CmsProjectPage {
+  return Boolean(
+    project?.projectId &&
+      project.titleRu &&
+      project.overviewRu &&
+      hasItems(project.gallery?.filter((url) => typeof url === "string" && url.length > 0)),
+  )
 }
 
 function mapLocalProjectsToHomepage(): HomepagePortfolioProject[] {
@@ -661,35 +689,28 @@ function mapCmsProjectsToHomepage(cmsProjects: CmsProjectPage[]): HomepagePortfo
 }
 
 export async function getHero(): Promise<HeroContent> {
-  return fetchSanity(heroQuery, fallbackHero)
+  const data = await fetchSanity(heroQuery, fallbackHero)
+  return mergeSection(fallbackHero, data, ["benefits"])
 }
 
 export async function getFeatures(): Promise<FeaturesContent> {
-  if (!sanityClient) return fallbackFeatures
-  try {
-    return (await sanityClient.fetch(featuresQuery, {}, { cache: "no-store" })) || fallbackFeatures
-  } catch {
-    return fallbackFeatures
-  }
+  const data = await fetchSanity(featuresQuery, fallbackFeatures)
+  return mergeSection(fallbackFeatures, data, ["items"])
 }
 
 export async function getAbout(): Promise<AboutContent> {
-  return fetchSanity(aboutQuery, fallbackAbout)
+  const data = await fetchSanity(aboutQuery, fallbackAbout)
+  return mergeSection(fallbackAbout, data, ["paragraphs", "images"])
 }
 
 export async function getProblems(): Promise<ProblemsContent> {
-  return fetchSanity(problemsQuery, fallbackProblems)
+  const data = await fetchSanity(problemsQuery, fallbackProblems)
+  return mergeSection(fallbackProblems, data, ["items"])
 }
 
 export async function getServicesSection(): Promise<ServicesSectionContent> {
   const data = await fetchSanity(servicesSectionQuery, fallbackServicesSection)
-  return {
-    ...fallbackServicesSection,
-    ...data,
-    items: data.items?.length ? data.items : fallbackServicesSection.items,
-    processSteps: data.processSteps?.length ? data.processSteps : fallbackServicesSection.processSteps,
-    prices: data.prices?.length ? data.prices : fallbackServicesSection.prices,
-  }
+  return mergeSection(fallbackServicesSection, data, ["items", "processSteps", "prices"])
 }
 
 export async function getPortfolioSection(): Promise<PortfolioSectionContent> {
@@ -704,11 +725,7 @@ export async function getHomepagePortfolioProjects(): Promise<HomepagePortfolioP
 
 export async function getStatsSection(): Promise<StatsSectionContent> {
   const data = await fetchSanity(statsSectionQuery, fallbackStatsSection)
-  return {
-    ...fallbackStatsSection,
-    ...data,
-    items: data.items?.length ? data.items : fallbackStatsSection.items,
-  }
+  return mergeSection(fallbackStatsSection, data, ["items"])
 }
 
 export async function getCalculatorSection(): Promise<CalculatorSectionContent> {
@@ -717,21 +734,12 @@ export async function getCalculatorSection(): Promise<CalculatorSectionContent> 
 
 export async function getTestimonialsSection(): Promise<TestimonialsSectionContent> {
   const data = await fetchSanity(testimonialsSectionQuery, fallbackTestimonialsSection)
-  return {
-    ...fallbackTestimonialsSection,
-    ...data,
-    reviews: data.reviews?.length ? data.reviews : fallbackTestimonialsSection.reviews,
-    locations: data.locations?.length ? data.locations : fallbackTestimonialsSection.locations,
-  }
+  return mergeSection(fallbackTestimonialsSection, data, ["reviews", "locations"])
 }
 
 export async function getFaqSection(): Promise<FaqSectionContent> {
   const data = await fetchSanity(faqSectionQuery, fallbackFaqSection)
-  return {
-    ...fallbackFaqSection,
-    ...data,
-    items: data.items?.length ? data.items : fallbackFaqSection.items,
-  }
+  return mergeSection(fallbackFaqSection, data, ["items"])
 }
 
 export async function getCtaSection(): Promise<CtaSectionContent> {
@@ -740,20 +748,12 @@ export async function getCtaSection(): Promise<CtaSectionContent> {
 
 export async function getNavigation(): Promise<NavigationContent> {
   const data = await fetchSanity(navigationQuery, fallbackNavigation)
-  return {
-    ...fallbackNavigation,
-    ...data,
-    items: data.items?.length ? data.items : fallbackNavigation.items,
-  }
+  return mergeSection(fallbackNavigation, data, ["items"])
 }
 
 export async function getFooter(): Promise<FooterContent> {
   const data = await fetchSanity(footerQuery, fallbackFooter)
-  return {
-    ...fallbackFooter,
-    ...data,
-    sectionLinks: data.sectionLinks?.length ? data.sectionLinks : fallbackFooter.sectionLinks,
-  }
+  return mergeSection(fallbackFooter, data, ["sectionLinks"])
 }
 
 export async function getHomepageContent(): Promise<HomepageContent> {
@@ -807,7 +807,8 @@ export async function getHomepageContent(): Promise<HomepageContent> {
 export async function getProjectPageById(id: string): Promise<CmsProjectPage | null> {
   if (!sanityClient) return null
   try {
-    return await sanityClient.fetch(projectPageByIdQuery, { id }, { cache: "no-store" })
+    const project = await sanityClient.fetch<CmsProjectPage | null>(projectPageByIdQuery, { id }, { cache: "no-store" })
+    return isCompleteCmsProject(project) ? project : null
   } catch {
     return null
   }
@@ -819,9 +820,13 @@ export async function getRelatedProjectPages(
 ): Promise<CmsProjectPage[]> {
   if (!sanityClient) return []
   try {
-    return (
-      (await sanityClient.fetch(relatedProjectPagesQuery, { currentId, projectType }, { cache: "no-store" })) || []
-    )
+    const projects =
+      (await sanityClient.fetch<CmsProjectPage[]>(
+        relatedProjectPagesQuery,
+        { currentId, projectType },
+        { cache: "no-store" },
+      )) || []
+    return projects.filter(isCompleteCmsProject)
   } catch {
     return []
   }
@@ -830,7 +835,9 @@ export async function getRelatedProjectPages(
 export async function getPortfolioProjectPages(): Promise<CmsProjectPage[]> {
   if (!sanityClient) return []
   try {
-    return (await sanityClient.fetch(portfolioProjectPagesQuery, {}, { cache: "no-store" })) || []
+    const projects =
+      (await sanityClient.fetch<CmsProjectPage[]>(portfolioProjectPagesQuery, {}, { cache: "no-store" })) || []
+    return projects.filter(isCompleteCmsProject)
   } catch {
     return []
   }

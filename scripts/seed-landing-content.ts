@@ -1,4 +1,4 @@
-import { getCliClient } from 'sanity/cli'
+import { getSeedClient } from './sanity-seed-client'
 
 const problemImages = [
   'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop',
@@ -28,7 +28,7 @@ const aboutImages = [
 ]
 
 async function seedLandingContent() {
-  const client = getCliClient({ apiVersion: '2025-01-01' })
+  const client = getSeedClient()
 
   await client.createOrReplace({
     _id: 'navigation.main',
